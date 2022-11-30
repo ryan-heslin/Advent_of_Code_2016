@@ -1,38 +1,4 @@
-with open("inputs/day1.txt") as f:
-    raw_input = f.read().split(", ")
-
-# starting east, going counterclockwise
-directions = {0: [1, 0], 1: [0, 1], 2: [-1, 0], 3: [0, -1]}
-modulus = len(directions)
-translations = {"R": -1, "L": 1}
-
-position = [0, 0]
-direction = 1
-
-visited = [tuple(position)]
-part2_undone = True
-part2 = None
-
-# raw_input = ["R8", "R4", "R4", "R8"]
-
-# TODO check if any old position between current position and position after current displacement
-# Better: track xend-yend of each segment, check for intersections
-
-# l1 norm
-def l1(x):
-    return sum([abs(el) for el in x])
-
-
-def find_overlap(x, y):
-    x = sorted(x)
-    if y[0] < y[1]:
-        rng = range(y[0], y[1] + 1, 1)
-    else:
-        rng = range(y[0], y[1] - 1, -1)
-    for pos in rng:
-        if x[0] <= pos <= x[1]:
-            return pos
-    return None
+from collections import defaultdict
 
 
 def segment_intersection(seg1, seg2):
@@ -86,6 +52,18 @@ def segment_intersection(seg1, seg2):
         return candidate
 
 
+def find_overlap(x, y):
+    x = sorted(x)
+    if y[0] < y[1]:
+        rng = range(y[0], y[1] + 1, 1)
+    else:
+        rng = range(y[0], y[1] - 1, -1)
+    for pos in rng:
+        if x[0] <= pos <= x[1]:
+            return pos
+    return None
+
+
 # Both horizontal
 assert segment_intersection([(0, 0), (8, 0)], [(20, 0), (-2, 0)]) == (8, 0)
 assert segment_intersection([(0, 0), (8, 0)], [(7, 0), (8, 0)]) == (7, 0)
@@ -105,6 +83,40 @@ assert segment_intersection([(0, 0), (0, 8)], [(-4, 4), (4, 4)]) == (0, 4)
 assert segment_intersection([(0, 0), (0, 8)], [(-4, 4), (4, 0)]) == (0, 4)
 # Parallel horizontal
 assert segment_intersection([(0, 0), (8, 0)], [(8, -4), (4, -4)]) is None
+
+
+with open("inputs/day1.txt") as f:
+    raw_input = f.read().split(", ")
+
+# starting east, going counterclockwise
+directions = {0: [1, 0], 1: [0, 1], 2: [-1, 0], 3: [0, -1]}
+modulus = len(directions)
+translations = {"R": -1, "L": 1}
+
+start = (0, 0)
+position = list(start)
+direction = 1
+
+visited = defaultdict(lambda: False)
+old_position = start
+visited[start] = True
+part2_undone = True
+part2 = None
+
+# raw_input = ["R8", "R4", "R4", "R8"]
+
+
+def count_up(start, end):
+    return range(start + 1, end + 1, 1)
+
+
+def count_down(start, end):
+    return range(start - 1, end - 1, -1)
+
+
+# l1 norm
+def l1(x):
+    return sum([abs(el) for el in x])
 
 
 # Checks if coordinate falls on line segment connecting two other coordinates
@@ -131,26 +143,48 @@ for i, instr in enumerate(raw_input):
     new_position = tuple(position)
 
     if part2_undone:
-        old_position = visited[-1]
-
         if old_position[0] == new_position[0]:
-
-        visited.append(new_position)
-        new_segment = visited[-2:]
-        print("\n\n\n")
-        print("----------------")
-        for i in range(0, len(visited) - 2):
-            print([visited[i], visited[i + 1]])
-            print(new_segment)
-            print("\n")
-            intersection = segment_intersection(
-                [visited[i], visited[i + 1]], new_segment
-            )
-            if intersection is not None and intersection != new_segment[0]:
-                print(intersection)
-                part2 = l1(intersection)
+            fixed = old_position[0]
+            new_point = lambda fixed, i: (fixed, i)
+            if old_position[1] < new_position[1]:
+                rng = count_up(old_position[1], new_position[1])
+            else:
+                rng = count_down(old_position[1], new_position[1])
+        # Horizontal (constant y-value)
+        else:
+            fixed = old_position[1]
+            new_point = lambda fixed, i: (i, fixed)
+            if old_position[0] < new_position[0]:
+                rng = count_up(old_position[0], new_position[0])
+            else:
+                rng = count_down(old_position[0], new_position[0])
+        for i in rng:
+            this_point = new_point(fixed, i)
+            if visited[this_point]:
+                print(this_point)
+                part2 = l1(this_point)
                 part2_undone = False
                 break
+            else:
+                visited[this_point] = True
+        else:
+            old_position = this_point
+
+        # new_segment = visited[-2:]
+        # print("\n\n\n")
+        # print("----------------")
+        # for i in range(0, len(visited) - 2):
+        #     print([visited[i], visited[i + 1]])
+        #     print(new_segment)
+        #     print("\n")
+        #     intersection = segment_intersection(
+        #         [visited[i], visited[i + 1]], new_segment
+        #     )
+        #     if intersection is not None and intersection != new_segment[0]:
+        #         print(intersection)
+        #         part2 = l1(intersection)
+        #         part2_undone = False
+        #         break
 
 # 126 low, but looks accurate - missed one before
 part1 = l1(position)
