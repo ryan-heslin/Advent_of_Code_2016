@@ -27,6 +27,7 @@ class Node:
         self.available = available
         self.neighbors = None
         self.empty = self.used == 0
+        self.full = self.available == 0
 
     def add_neighbors(self, func):
         self.neighbors = func(self.coords)
@@ -55,7 +56,6 @@ def parse(lines):
 
             args = (int(x.rstrip("T")) for x in parts[1:4])
             result.append(Node(coords, *args))
-    print({"xmin": xmin, "xmax": xmax, "ymin": ymin, "ymax": ymax})
     return result, {"xmin": xmin, "xmax": xmax, "ymin": ymin, "ymax": ymax}
 
 
@@ -86,15 +86,49 @@ can_move = {
     for coord in node.neighbors
 }
 
+# too_small = 0
+# for i in range(free[0] + 1, extents["xmax"]):
+#     too_small += nodes[(i - 1, free[1])].size < nodes[(i, free[1])].used
+#
+# for j in range(free[1] + 1, extents["ymin"] - 1):
+#     too_small += (
+#         nodes[(extents["xmax"] - 1, j - 1)].size
+#         < nodes[(extents["xmax"] - 1, j)].used.used
+#     )
+# # TODO count "full" nodes; there should be five to add to total tiles
+# for i in range(1, extents["xmax"]):
+#     too_small += nodes[(i - 1, 0)].size < nodes[(i, 0)].used
+#
 goal = (extents["xmin"], extents["ymin"])
 target = (extents["xmax"], extents["ymin"])
-part2 = (
-    (
-        abs(free[0] - target[0]) - 1
-    )  # Initial shift down and left to clear node left of target, plus initial movement left of target
-    + (
-        abs(free[1] - target[1]) + 1
-    )  # Five moves for each subsequent movement, including onto goal node
+# TODO: figure out whether this is just accidentally right
+
+full = list(filter(lambda k: nodes[k].used > 100, nodes.keys()))
+
+part2 = 0
+xes = [coord[0] for coord in filter(lambda coord: coord[1] < free[1], full)]
+if free[0] in xes:
+    left_deviation = right_deviation = 2
+    for i in range(free[0] - 1, min(xes) - 1, -1):
+        if not i in xes:
+            break
+        left_deviation += 2
+    for i in range(free[0] + 1, max(xes) + 1):
+        if not i in xes:
+            break
+        right_deviation += 2
+    part2 += min((left_deviation, right_deviation))
+
+too_small_top = list(
+    filter(
+        lambda k: k[1] == 0 and nodes[k].size < nodes[(k[0], 1)].used < 10, nodes.keys()
+    )
+)
+part2 += (
+    abs(free[0] - target[0])
+    # Initial shift down and left to clear node left of target, plus initial movement left of target
+    + abs(free[1] - target[1])
+    # Five moves for each subsequent movement, including onto goal node
     + (5 * (abs(goal[0] - target[0]) - 1))
 )
 
@@ -106,4 +140,5 @@ assert all(
 )
 
 print(part2)
-# 221 too low
+# Must be 3 in the way
+# Just add 6 to correct formula?
