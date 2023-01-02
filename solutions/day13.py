@@ -1,21 +1,59 @@
 from collections import defaultdict
+from collections import deque
 from functools import cache
+from math import inf
 
 favorite = 10
 # Default to
-map = defaultdict(lambda k: Node(k[0], k[1], favorite, map))
+graph = defaultdict(lambda k: Node(k[0], k[1], favorite, graph))
 
 start = (1, 1)
 goal = (7, 4)
 
 
+def dijkstra(start, graph):
+    dist = defaultdict(lambda: inf)
+    prev = defaultdict(lambda: None)
+    dist[start] = 0
+
+    Q = deque([start])
+    visited = set()
+
+    while Q:
+        current = Q.popleft()
+        if current == goal:
+            break
+        visited.add(current)
+
+        for node in graph[current].find_neighbors():
+            alt = dist[current] + 1
+            if alt < dist[node]:
+                dist[node] = alt
+                prev[node] = current
+
+    return dist, prev
+
+
+def reconstruct_path(target, prev):
+    S = deque([])
+    u = target
+    while u:
+        S.appendleft(u)
+        u = prev[u]
+    return S
+
+
+def l1(x, y):
+    return sum(abs(x[i] - y[i]) for i in range(len(x)))
+
+
 class Node:
-    def __init__(self, x, y, favorite, map) -> None:
+    def __init__(self, x, y, favorite, graph) -> None:
         self.x = x
         self.y = y
         self.favorite = favorite
         self.is_open = self.open(self.x, self.y)
-        self.map = map
+        self.graph = graph
         self.neighbors = set()
         self.neighbors_found = False
 
@@ -32,8 +70,8 @@ class Node:
         return self.neighbors
 
     def verify_neighbor(self, coord):
-        candidate = self.map[coord]
-        if candidate.open:
+        candidate = self.graph[coord]
+        if candidate.is_open:
             self.neighbors.add(candidate)
 
     def coord_sum(self, x, y):
@@ -44,8 +82,8 @@ class Node:
         return bin(num).count("1")
 
     def open(self, x, y):
-        return not bool(__class__.count_ones(self.coord_sum(x, y)) % 2)
+        return not (self.coord_sum(x, y).bit_count() % 2)
 
 
-map[start] = Node(*start, favorite, map)
-map[goal] = Node(*goal, favorite, map)
+graph[start] = Node(*start, favorite, graph)
+graph[goal] = Node(*goal, favorite, graph)
