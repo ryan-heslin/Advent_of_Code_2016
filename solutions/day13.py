@@ -21,7 +21,6 @@ def A_star(start, goal, graph, h):
 
     Q = PriorityQueue()
     Q.put((f_score[start], start), block=False)
-    # breakpoint()
 
     while Q.qsize():
         _, current_node = Q.get(block=False)
