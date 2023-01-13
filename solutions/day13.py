@@ -11,7 +11,7 @@ start = (1, 1)
 goal = (31, 39)
 
 
-def A_star(start, goal, graph, h):
+def A_star(start, graph, h):
     came_from = {}
     visited = set()
     f_score = defaultdict(lambda: inf)
@@ -24,9 +24,6 @@ def A_star(start, goal, graph, h):
 
     while Q.qsize():
         _, current_node = Q.get(block=False)
-        # visited.add(current_node)
-        # if current_node == goal:
-        #     return reconstruct_path(came_from, current_node)
 
         for neighbor in graph[current_node].find_neighbors():
             # Since neighbors are directly connected
@@ -112,7 +109,7 @@ graph[start] = Node(*start, favorite, graph)
 graph[goal] = Node(*goal, favorite, graph)
 h = l1_maker(goal)
 
-came_from = A_star(start, goal, graph, h)
+came_from = A_star(start, graph, h)
 part1 = len(reconstruct_path(came_from, goal)) - 1
 print(part1)
 
