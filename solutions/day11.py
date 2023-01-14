@@ -8,6 +8,20 @@ from os import getcwd
 from os.path import abspath
 from queue import PriorityQueue
 
+# Only important th
+# For each floor, track:
+# Whether goal floor
+# Number of RTG-chip pairs
+# For each lone chip, floor of mate
+# For each lone generaotr, floor of mate
+
+
+# Try list of chip-generator tuples, each indicating floor
+# Suggested by discord user Sleafar
+class State:
+    def __init__(self):
+        pass
+
 
 def display(num, elements, player_bit):
     fill_digits = int(log2(player_bit))
@@ -65,19 +79,31 @@ def parse(raw):
     return result, elements
 
 
+iter_floors = (4, 3, 2)
 # @cache
+# TODO rewrite to compute best cost if all item interference rules relaxed
 def h(state):
-    s = 0
-    for k, v in state.items():
-        bits = v.bit_count()
-        if bits > 0:
-            if v >= player_bit:
-                bits -= 1
-                v ^= player_bit
-                s += k if bits <= 2 else 2 * k * (bits - 2) + k
-            else:
-                s += k + (k * 2 if bits == 1 else 2 * k * (bits - 1))
+    # Reminder: A* is correct IFF h never overestimates
+    s = running = 0
+    for k in iter_floors:
+        this_floor = state[(k - 1)]
+        this_floor ^= player_bit * (this_floor >= player_bit)
+        this_floor = this_floor.bit_count()
+        running += this_floor
+        if running > 0:
+            s += 2 * max(running - 2, 0) + 1
     return s
+
+    # for k, v in state.items():
+    #     bits = v.bit_count()
+    #     if bits > 0:
+    #         if v >= player_bit:
+    #             bits -= 1
+    #             v ^= player_bit
+    #             s += k if bits <= 2 else 2 * k * (bits - 2) + k
+    #         else:
+    #             s += k + (k * 2 if bits == 1 else 2 * k * (bits - 1))
+    # return s
     # return sum((k * v.bit_count() - (v >= player_bit) for k, v in state.items()))
 
 
@@ -145,8 +171,10 @@ def A_star(start, n_elements, h):
     while Q.qsize():
         h_score, current_hash, current_state = Q.get(block=False)
         if (
-            h_score + g_score[current_hash] >= g_score[goal_hash]
-            or current_state[top] == goal
+            # Unsure if safe, since h can overestimate
+            # h_score + g_score[current_hash] >= g_score[goal_hash]
+            current_state[top]
+            == goal
         ):
             # breakpoint()
             continue
@@ -233,8 +261,13 @@ def A_star(start, n_elements, h):
                         )
         # Combinations
         if generators and microchips:
+            moved_pair = False
             for generator in generators:
                 for chip in microchips:
+                    if generator == chip:
+                        if moved_pair:
+                            continue
+                        moved_pair = True
                     combined_num = 2 ** (generator * 2) + 2 ** (chip * 2 + 1)
                     new_current_floor_num = current_floor_num ^ combined_num
                     if validate(new_current_floor_num):
@@ -292,9 +325,9 @@ with open("inputs/day11.txt") as f:
 #
 start, elements = parse(raw_input)
 player_bit = 2 ** (len(elements.keys()) * 2)
-# display(460, reversed(tuple(el[:2].title() for el in elements.keys())))
 
-part1 = A_star(start, len(elements.keys()), h)
+# part1 = A_star(start, len(elements.keys()), h)
+part1 = h(start)
 print(part1)
 
 raw_input = raw_input.replace(
@@ -304,5 +337,6 @@ raw_input = raw_input.replace(
 )
 start, elements = parse(raw_input)
 player_bit = 2 ** (len(elements.keys()) * 2)
-part2 = A_star(start, len(elements.keys()), h)
+# part2 = A_star(start, len(elements.keys()), h)
+part2 = h(start)
 print(part2)
