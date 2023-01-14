@@ -4,23 +4,7 @@ from collections import deque
 from functools import cache
 from math import inf
 from math import log2
-from os import getcwd
-from os.path import abspath
 from queue import PriorityQueue
-
-# Only important th
-# For each floor, track:
-# Whether goal floor
-# Number of RTG-chip pairs
-# For each lone chip, floor of mate
-# For each lone generaotr, floor of mate
-
-
-# Try list of chip-generator tuples, each indicating floor
-# Suggested by discord user Sleafar
-class State:
-    def __init__(self):
-        pass
 
 
 def display(num, elements, player_bit):
@@ -38,22 +22,7 @@ def display(num, elements, player_bit):
     print(digits)
 
 
-# @cache
-# def get_rtgs(num):
-#     element = 0
-#     # Drop player bit, if present
-#     num ^= (num >= player_bit) * player_bit
-#     highest = (num.bit_length() - 1) // 2
-#     rtgs = set()
-#     for element in range(highest + 1):
-#         if num % 2 == 1:
-#             rtgs.add(element)
-#         num >>= 2
-#     return frozenset(rtgs)
-#
-#
 def parse(raw):
-    # breakpoint()
     values = {"generator": 0, "microchip": 1}
     elements = sorted(re.findall(r"[a-z]+(?:ium|gen)", raw))
     filtered = []
@@ -93,18 +62,6 @@ def h(state):
         if running > 0:
             s += 2 * max(running - 2, 0) + 1
     return s
-
-    # for k, v in state.items():
-    #     bits = v.bit_count()
-    #     if bits > 0:
-    #         if v >= player_bit:
-    #             bits -= 1
-    #             v ^= player_bit
-    #             s += k if bits <= 2 else 2 * k * (bits - 2) + k
-    #         else:
-    #             s += k + (k * 2 if bits == 1 else 2 * k * (bits - 1))
-    # return s
-    # return sum((k * v.bit_count() - (v >= player_bit) for k, v in state.items()))
 
 
 def make_hash(state):
@@ -167,14 +124,11 @@ def A_star(start, n_elements, h):
     visited.add(start_hash)
     Q.put((f_score[start_hash], start_hash, start), block=False)
 
-    # TODO store neighbors in dict
     while Q.qsize():
         h_score, current_hash, current_state = Q.get(block=False)
         if (
-            # Unsure if safe, since h can overestimate
-            # h_score + g_score[current_hash] >= g_score[goal_hash]
-            current_state[top]
-            == goal
+            h_score + g_score[current_hash] >= g_score[goal_hash]
+            or current_state[top] == goal
         ):
             # breakpoint()
             continue
