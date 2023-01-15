@@ -12,25 +12,6 @@ def compile_parts(parts, args):
     return compile(f"{parts[0]}({args})", "", "eval")
 
 
-def inc(reg, i):
-    registers[reg] += 1
-    return i + 1
-
-
-def dec(reg, i):
-    registers[reg] -= 1
-    return i + 1
-
-
-def cpy(x, y, i):
-    registers[y] = registers.get(x, x)
-    return i + 1
-
-
-def jnz(x, y, i):
-    return i + y if registers.get(x, x) != 0 else i + 1
-
-
 class Program:
     replacements = {
         "inc": "dec",

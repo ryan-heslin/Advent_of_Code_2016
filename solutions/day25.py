@@ -1,12 +1,13 @@
 from math import inf
 
 import utils.assembunny as ab
+from utils.utils import split_lines
 
 
 class ClockProgram(ab.Program):
-    def __init__(self, params) -> None:
-        super().__init__()
-        self.states = set()
+    def __init__(self, params, **settings) -> None:
+        super().__init__(params, **settings)
+        self.count = 0
         self.next = 0
         self.found = False
 
@@ -20,12 +21,24 @@ class ClockProgram(ab.Program):
         if signal != self.next:
             return inf
         self.next = (self.next + 1) % 2
-        new_state = tuple(self.registers.values())
-        # Todo; can't check for repeat states, but must
-        # ensure index never overshoots program end
-        # Maybe all greater/less?
-        if new_state in self.states:
+        if self.count > 512:
             self.found = True
             return inf
-        self.states.add(new_state)
+        self.count += 1
+
         return i + 1
+
+
+raw_input = split_lines("inputs/day25.txt")
+params = [ab.parse_line(line) for line in raw_input]
+i = 1
+
+while True:
+    program = ClockProgram(params, a=i)
+    program.exec()
+    if program.found:
+        break
+    i += 1
+
+part1 = i
+print(part1)
