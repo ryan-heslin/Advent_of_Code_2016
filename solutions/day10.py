@@ -1,6 +1,6 @@
 import re
 
-from utils import split_lines
+from utils.utils import split_lines
 
 raw_input = split_lines("inputs/day10.txt")
 
@@ -66,7 +66,6 @@ def parse(line, mapping={"bot": "bots", "output": "outputs"}):
         targets = re.findall(r"(?<=\s)[a-z]+(?=\s\d+)", line)
         targets = [mapping[target] for target in targets]
         result = f"{mapping['bot']}[{args[0]}].give({args[1]}, {args[2]}, {targets[0]}, {targets[1]})"
-    print(result)
     return compile(result, "", "eval")
 
 

@@ -1,4 +1,3 @@
-from collections import defaultdict
 from hashlib import md5
 from queue import PriorityQueue
 
@@ -81,14 +80,13 @@ raw_input = """#########
 """
 lines = raw_input.splitlines()
 passcode = "rrrbmfta"
+index = len(passcode)
 start, goal, xmax, ymax = parse(lines)
 distance = l1_maker(goal)
-part1 = search(passcode, start, goal, distance, (0, xmax), (0, ymax), False)[
-    len(passcode) :
-]
-print(part1)
+part1 = search(passcode, start, goal, distance, (0, xmax), (0, ymax), False)
+if part1:
+    print(part1[index:])
 
-part2 = search(passcode, start, goal, distance, (0, xmax), (0, ymax), True)[
-    len(passcode) :
-]
-print(len(part2))
+part2 = search(passcode, start, goal, distance, (0, xmax), (0, ymax), True)
+if part2:
+    print(len(part2[index:]))

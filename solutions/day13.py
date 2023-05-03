@@ -5,7 +5,6 @@ from math import inf
 from queue import PriorityQueue
 
 favorite = 1362
-# Default to
 
 start = (1, 1)
 goal = (31, 39)

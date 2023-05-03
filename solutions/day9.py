@@ -59,7 +59,6 @@ def parse(string, recurse=False):
             new_length = len(new_text)
         result += new_length  # * reps
         # print(result)
-        # print(result)
     return result
 
 
