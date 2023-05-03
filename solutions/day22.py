@@ -9,7 +9,6 @@ def neighbor_finder(xmin, xmax, ymin, ymax):
             result.add((coord[0] - 1, coord[1]))
         if coord[0] < xmax:
             result.add((coord[0] + 1, coord[1]))
-
         if coord[1] > ymin:
             result.add((coord[0], coord[1] - 1))
         if coord[1] < ymax:
@@ -86,22 +85,8 @@ can_move = {
     for coord in node.neighbors
 }
 
-# too_small = 0
-# for i in range(free[0] + 1, extents["xmax"]):
-#     too_small += nodes[(i - 1, free[1])].size < nodes[(i, free[1])].used
-#
-# for j in range(free[1] + 1, extents["ymin"] - 1):
-#     too_small += (
-#         nodes[(extents["xmax"] - 1, j - 1)].size
-#         < nodes[(extents["xmax"] - 1, j)].used.used
-#     )
-# # TODO count "full" nodes; there should be five to add to total tiles
-# for i in range(1, extents["xmax"]):
-#     too_small += nodes[(i - 1, 0)].size < nodes[(i, 0)].used
-#
 goal = (extents["xmin"], extents["ymin"])
 target = (extents["xmax"], extents["ymin"])
-# TODO: figure out whether this is just accidentally right
 
 full = list(filter(lambda k: nodes[k].used > 100, nodes.keys()))
 

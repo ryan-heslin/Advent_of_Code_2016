@@ -2,7 +2,6 @@
 # https://en.wikipedia.org/wiki/Josephus_problem
 def josephus(n):
     highest_one = 2 ** ((n * 2).bit_length() - 1)
-    # return 2 * (n - highest_one) + 1
     return ~highest_one & ((n << 1) | 1)
 
 
