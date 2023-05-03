@@ -2,8 +2,7 @@ import re
 
 import matplotlib.pyplot as plt
 import numpy as np
-
-from utils import split_lines
+from utils.utils import split_lines
 
 raw_input = split_lines("inputs/day8.txt")
 

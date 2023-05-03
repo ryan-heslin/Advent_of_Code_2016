@@ -1,7 +1,6 @@
+import re
 from collections import Counter
 from collections import defaultdict
-
-import regex
 
 ascii_a = 97
 
@@ -62,7 +61,15 @@ def decrypt_room(rooms):
 
 pattern = r"^(?P<name>(?:[a-z]+-)+)(?P<id>\d+)\[(?P<checksum>[a-z]+)\]"
 
-decomposed = [regex.match(pattern, string).capturesdict() for string in raw_input]
+decomposed = [
+    dict(
+        zip(
+            ("name", "id", "checksum"),
+            ([x] for x in re.match(pattern, string).groups()),
+        )
+    )
+    for string in raw_input
+]
 
 part1 = sum((verify_room(di) for di in decomposed))
 print(part1)

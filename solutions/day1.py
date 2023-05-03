@@ -2,8 +2,6 @@ from collections import defaultdict
 
 
 def segment_intersection(seg1, seg2):
-    # breakpoint()
-
     # Find whether each segment is vertical or horizontal
     seg1_constant = 0 if seg1[0][0] == seg1[1][0] else 1
     seg2_constant = 0 if seg2[0][0] == seg2[1][0] else 1
@@ -161,7 +159,6 @@ for i, instr in enumerate(raw_input):
         for i in rng:
             this_point = new_point(fixed, i)
             if visited[this_point]:
-                print(this_point)
                 part2 = l1(this_point)
                 part2_undone = False
                 break
@@ -170,23 +167,7 @@ for i, instr in enumerate(raw_input):
         else:
             old_position = this_point
 
-        # new_segment = visited[-2:]
-        # print("\n\n\n")
-        # print("----------------")
-        # for i in range(0, len(visited) - 2):
-        #     print([visited[i], visited[i + 1]])
-        #     print(new_segment)
-        #     print("\n")
-        #     intersection = segment_intersection(
-        #         [visited[i], visited[i + 1]], new_segment
-        #     )
-        #     if intersection is not None and intersection != new_segment[0]:
-        #         print(intersection)
-        #         part2 = l1(intersection)
-        #         part2_undone = False
-        #         break
 
-# 126 low, but looks accurate - missed one before
 part1 = l1(position)
 print(part1)
 print(part2)
