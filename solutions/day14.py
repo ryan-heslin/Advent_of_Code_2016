@@ -12,6 +12,7 @@ def repeat_chars(string, n):
 
 def process_hash(string, times=1):
     old = string
+    hash = None
     for _ in range(0, times):
         hash = str(md5(old.encode("utf-8")).hexdigest())
         old = hash

@@ -1,11 +1,13 @@
-raw_input <- read.table("inputs/day6.txt", sep = "")
-processed <- strsplit(raw_input[[1]], split = "") |>
-    do.call(what = rbind)
-
+# Most or least common
 select_level <- function(x, fun) {
     counts <- table(x)
     names(counts[counts == fun(counts)])
 }
+
+raw_input <- read.table("inputs/day6.txt", sep = "")
+processed <- strsplit(raw_input[[1]], split = "") |>
+    do.call(what = rbind)
+
 
 part1 <- apply(processed, MARGIN = 2, FUN = select_level, fun = max) |> paste(collapse = "")
 

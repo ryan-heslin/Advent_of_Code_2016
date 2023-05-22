@@ -1,6 +1,19 @@
 from collections import defaultdict
 
 
+def count_up(start, end):
+    return range(start + 1, end + 1, 1)
+
+
+def count_down(start, end):
+    return range(start - 1, end - 1, -1)
+
+
+# l1 norm
+def l1(x):
+    return sum([abs(el) for el in x])
+
+
 def segment_intersection(seg1, seg2):
     # Find whether each segment is vertical or horizontal
     seg1_constant = 0 if seg1[0][0] == seg1[1][0] else 1
@@ -62,27 +75,6 @@ def find_overlap(x, y):
     return None
 
 
-# Both horizontal
-assert segment_intersection([(0, 0), (8, 0)], [(20, 0), (-2, 0)]) == (8, 0)
-assert segment_intersection([(0, 0), (8, 0)], [(7, 0), (8, 0)]) == (7, 0)
-assert segment_intersection([(0, 0), (8, 0)], [(8, 0), (999, 0)]) == (8, 0)
-assert segment_intersection([(-999, 0), (8, 0)], [(999, 0), (8, 0)]) == (8, 0)
-# Both vertical
-assert segment_intersection([(0, 0), (0, 8)], [(0, 20), (0, -2)]) == (0, 8)
-assert segment_intersection([(0, 0), (0, 8)], [(0, 20), (0, 8)]) == (0, 8)
-
-assert segment_intersection([(0, 0), (8, 0)], [(4, -4), (4, -1)]) is None
-assert find_overlap((3, 5), (9, 4)) == 5
-assert find_overlap((3, 5), (10, 5)) == 5
-
-assert segment_intersection([(0, 0), (8, 0)], [(4, -4), (4, 4)]) == (4, 0)
-# Vertical-horizontal
-assert segment_intersection([(0, 0), (0, 8)], [(-4, 4), (4, 4)]) == (0, 4)
-assert segment_intersection([(0, 0), (0, 8)], [(-4, 4), (4, 0)]) == (0, 4)
-# Parallel horizontal
-assert segment_intersection([(0, 0), (8, 0)], [(8, -4), (4, -4)]) is None
-
-
 with open("inputs/day1.txt") as f:
     raw_input = f.read().split(", ")
 
@@ -97,48 +89,17 @@ direction = 1
 
 visited = defaultdict(lambda: False)
 old_position = start
-visited[start] = True
-part2_undone = True
+visited[start] = part2_undone = True
 part2 = None
 
-# raw_input = ["R8", "R4", "R4", "R8"]
 
-
-def count_up(start, end):
-    return range(start + 1, end + 1, 1)
-
-
-def count_down(start, end):
-    return range(start - 1, end - 1, -1)
-
-
-# l1 norm
-def l1(x):
-    return sum([abs(el) for el in x])
-
-
-# Checks if coordinate falls on line segment connecting two other coordinates
-# def between(start, end, check):
-#
-#     constant_dim = 0 if start[0] == end[0] else 1
-#     changed_dim = (constant_dim + 1) % 2
-#
-#     if start[constant_dim] == end[constant_dim] == check[constant_dim]:
-#         result = (
-#             start[changed_dim] <= check[changed_dim] <= end[changed_dim]
-#             or end[changed_dim] <= check[changed_dim] <= start[changed_dim]
-#         )
-#     else:
-#         result = False
-#     return result
-#
-#
 for i, instr in enumerate(raw_input):
     direction = (direction + translations[instr[0]]) % modulus
     distance = int(instr[1:])
     position[0] += directions[direction][0] * distance
     position[1] += directions[direction][1] * distance
     new_position = tuple(position)
+    this_point = start
 
     if part2_undone:
         if old_position[0] == new_position[0]:

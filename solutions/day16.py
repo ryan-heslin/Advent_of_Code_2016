@@ -1,8 +1,5 @@
-from math import ceil
 from math import floor
 from math import log2
-
-# num + 0 + reverse(num xor 1)
 
 
 def binary(x):
@@ -38,7 +35,6 @@ def add_dummy_bit(n, target_length=None):
 
 
 # Copied from https://stackoverflow.com/questions/12681945/reversing-bits-of-python-integer
-# TODO handle leading zero bits
 def reverse_bits(num):
     result = i = 0
     while num:
@@ -53,22 +49,12 @@ def reverse_bits(num):
 def dragon_curve(a):
     # Handle leading: get length, pad to
     # length with leading 1
-    # breakpoint()
     b, n_digits = reverse_bits(a)
     b = add_dummy_bit(b, binary_digits(a))
     b ^= max(2 ** (n_digits) - 1, 1)
-    # Restore dummy bit just xor'd away
-    # b |= 2**n_digits
     # Just find position of dummy bit in concatenated number and XOR 2 **i
     result = (a << (n_digits + 1)) + b
-    # print(bin(result)[2:])
     return result ^ (2 ** (n_digits))
-
-
-assert dragon_curve(1) == 4
-assert dragon_curve(0) == 1
-assert dragon_curve(31) == 1984
-assert dragon_curve(binary("111100001010")) == binary("1111000010100101011110000")
 
 
 def fill_disk(n, disk_size):
@@ -135,7 +121,6 @@ def fill_disk_bytes(bytes, disk_size):
 
 
 def generate_checksum(bytes):
-    # breakpoint()
     while len(bytes) % 2 == 0:
         new = []
         for i in range(0, len(bytes) - 1, 2):

@@ -2,10 +2,7 @@ import re
 from collections import Counter
 from collections import defaultdict
 
-ascii_a = 97
-
-with open("inputs/day4.txt") as f:
-    raw_input = f.read().splitlines()
+ASCII_A = ord("a")
 
 
 def tabulate_letters(string):
@@ -44,7 +41,7 @@ def decrypt(code, id):
     code = code.replace("-", " ")
     return "".join(
         (
-            char if char == " " else chr(((ord(char) - ascii_a + id) % 26) + ascii_a)
+            char if char == " " else chr(((ord(char) - ASCII_A + id) % 26) + ASCII_A)
             for char in code
         )
     ).rstrip(" ")
@@ -59,6 +56,9 @@ def decrypt_room(rooms):
                 yield code
 
 
+with open("inputs/day4.txt") as f:
+    raw_input = f.read().splitlines()
+
 pattern = r"^(?P<name>(?:[a-z]+-)+)(?P<id>\d+)\[(?P<checksum>[a-z]+)\]"
 
 decomposed = [
@@ -71,7 +71,7 @@ decomposed = [
     for string in raw_input
 ]
 
-part1 = sum((verify_room(di) for di in decomposed))
+part1 = sum(map(verify_room, decomposed))
 print(part1)
 gen = decrypt_room(decomposed)
 part2 = next(gen)

@@ -4,11 +4,6 @@ from functools import cache
 from math import inf
 from queue import PriorityQueue
 
-favorite = 1362
-
-start = (1, 1)
-goal = (31, 39)
-
 
 def A_star(start, graph, h):
     came_from = {}
@@ -65,15 +60,15 @@ class Graph:
         if len(k) != 2:
             raise ValueError
         if k not in self.map.keys():
-            self.__setitem__(k, Node(*k, favorite, self))
+            self.__setitem__(k, Node(*k, FAVORITE, self))
         return self.map[k]
 
 
 class Node:
-    def __init__(self, x, y, favorite, graph) -> None:
+    def __init__(self, x, y, FAVORITE, graph) -> None:
         self.x = x
         self.y = y
-        self.favorite = favorite
+        self.FAVORITE = FAVORITE
         self.is_open = self.open(self.x, self.y)
         self.graph = graph
         self.neighbors = set()
@@ -97,15 +92,19 @@ class Node:
             self.neighbors.add((candidate.x, candidate.y))
 
     def coord_sum(self, x, y):
-        return ((x**2) + (3 * x) + (2 * x * y) + y + (y**2)) + self.favorite
+        return ((x**2) + (3 * x) + (2 * x * y) + y + (y**2)) + self.FAVORITE
 
     def open(self, x, y):
         return (self.coord_sum(x, y).bit_count() % 2) == 0
 
 
+FAVORITE = 1362
+
+start = (1, 1)
+goal = (31, 39)
 graph = Graph()
-graph[start] = Node(*start, favorite, graph)
-graph[goal] = Node(*goal, favorite, graph)
+graph[start] = Node(*start, FAVORITE, graph)
+graph[goal] = Node(*goal, FAVORITE, graph)
 h = l1_maker(goal)
 
 came_from = A_star(start, graph, h)
@@ -113,9 +112,10 @@ part1 = len(reconstruct_path(came_from, goal)) - 1
 print(part1)
 
 accessible = set()
+cutoff = 50 + 1
 for node in came_from.keys():
     if node not in accessible:
         path = list(reconstruct_path(came_from, node))
-        accessible.update(path[: min(51, len(path))])
+        accessible.update(path[: min(cutoff, len(path))])
 
 print(len(accessible))

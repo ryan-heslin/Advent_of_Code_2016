@@ -16,5 +16,3 @@ program = ab.Program(params, a=12)
 program.exec()
 part2 = program.registers["a"]
 print(part2)
-
-# >59780

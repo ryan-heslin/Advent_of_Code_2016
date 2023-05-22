@@ -117,13 +117,9 @@ part2 += (
     + (5 * (abs(goal[0] - target[0]) - 1))
 )
 
-# while cur.x > goal do
-#  if nodes[]
 target_size = nodes[target].size
 assert all(
     nodes[(x, 0)].size <= target_size for x in range(extents["xmin"], extents["xmax"])
 )
 
 print(part2)
-# Must be 3 in the way
-# Just add 6 to correct formula?

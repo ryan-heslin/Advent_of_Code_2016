@@ -30,7 +30,7 @@ class ClockProgram(ab.Program):
 
 
 raw_input = split_lines("inputs/day25.txt")
-params = [ab.parse_line(line) for line in raw_input]
+params = list(map(ab.parse_line, raw_input))
 i = 1
 
 while True:

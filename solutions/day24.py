@@ -4,16 +4,6 @@ from itertools import permutations
 from math import inf
 from queue import PriorityQueue
 
-# Parse data
-# Identify coords of goal nodes
-# Create map
-# Only node 5 might lie on shortest path between two others
-# All others in dead ends
-# Start at 0:
-# Map blocked spaces bordering open to False
-# For each node pair, find shortest path, including any other nodes traversed
-# Brute-force shortest tour, since only 9! possibilities
-
 
 def neighbor_finder(xmin, xmax, ymin, ymax, graph):
     @cache
@@ -98,11 +88,8 @@ def shortest_tour(paths):
         part1 = min(part1, distance)
         distance += paths[perm[i + 1]][0]
         part2 = min(part2, distance)
-        # if distance < best:
-        #     best = distance
-        #     best_tour = perm
         distance = 0
-    return part1, part2  # , best_tour
+    return part1, part2
 
 
 with open("inputs/day24.txt") as f:
@@ -122,5 +109,6 @@ for start_node, start in nodes.items():
             done.add((end_node, start_node))
 
 part1, part2 = shortest_tour(shortest)
+
 print(part1)
 print(part2)

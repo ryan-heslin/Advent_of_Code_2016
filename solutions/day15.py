@@ -1,7 +1,3 @@
-with open("inputs/day15.txt") as f:
-    raw_input = f.read().splitlines()
-
-
 def parse(line):
     parts = line.split()
     return Disk(int(parts[3]), int(parts[-1].rstrip(".")))
@@ -43,10 +39,13 @@ class Disk:
         self.position = self.init_position
 
     def __repr__(self) -> str:
-        return f"{self.position}"
+        return str(self.position)
 
 
-disks = [parse(line) for line in raw_input]
+with open("inputs/day15.txt") as f:
+    raw_input = f.read().splitlines()
+
+disks = list(map(parse, raw_input))
 
 part1 = simulate(disks)
 print(part1)

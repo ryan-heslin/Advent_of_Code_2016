@@ -2,11 +2,6 @@ import re
 
 from utils.utils import split_lines
 
-raw_input = split_lines("inputs/day10.txt")
-
-answers = [None]
-output = {}
-
 
 class Bot:
     def __init__(self, number):
@@ -69,8 +64,21 @@ def parse(line, mapping={"bot": "bots", "output": "outputs"}):
     return compile(result, "", "eval")
 
 
+def execute(instructions, outputs):
+    i = 0
+    n_instr = len(instructions)
+    while None in outputs.values():
+        eval(parsed[i])
+        i = (i + 1) % n_instr
+
+
+raw_input = split_lines("inputs/day10.txt")
+
+answers = [None]
+output = {}
 bot_numbers = set()
 bots = {}
+
 for line in raw_input:
     bot_numbers.update((int(x) for x in re.findall(r"bot (\d+)", line)))
 bots = dict(zip(bot_numbers, (Part1Bot(num) for num in bot_numbers)))
@@ -80,16 +88,7 @@ for line in raw_input:
     output_numbers.update((int(x) for x in re.findall(r"output (\d+)", line)))
 outputs = dict(zip(output_numbers, (None,) * len(output_numbers)))
 
-parsed = [parse(line) for line in raw_input]
-
-
-def execute(instructions, outputs):
-    i = 0
-    n_instr = len(instructions)
-    while None in outputs.values():
-        eval(parsed[i])
-        i = (i + 1) % n_instr
-
+parsed = list(map(parse, raw_input))
 
 execute(parsed, outputs)
 part1 = answers[0]

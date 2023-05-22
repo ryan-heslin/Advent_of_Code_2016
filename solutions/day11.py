@@ -7,6 +7,9 @@ from math import log2
 from queue import PriorityQueue
 
 
+iter_floors = (4, 3, 2)
+
+
 def display(num, elements, player_bit):
     fill_digits = int(log2(player_bit))
     if num.bit_length() >= fill_digits:
@@ -48,9 +51,7 @@ def parse(raw):
     return result, elements
 
 
-iter_floors = (4, 3, 2)
 # @cache
-# TODO rewrite to compute best cost if all item interference rules relaxed
 def h(state):
     # Reminder: A* is correct IFF h never overestimates
     s = running = 0
@@ -161,7 +162,6 @@ def A_star(start, n_elements, h):
             element += 1
 
         neighbors = []
-        # TODO optimizations:
         # If multiple chip-RTG pairs can be moved, pick 1
         # If several chips need moving each have RTGs on target floor, pick 1
         # Better h function
@@ -256,7 +256,6 @@ def A_star(start, n_elements, h):
                 g_score[neighbor_hash] = candidate_g_score
                 f_score[neighbor_hash] = candidate_g_score + estimate
                 Q.put((estimate, neighbor_hash, neighbor), block=False)
-                # visited.add(neighbor_hash)
     return g_score[goal_hash]
 
 
@@ -284,9 +283,10 @@ player_bit = 2 ** (len(elements.keys()) * 2)
 part1 = h(start)
 print(part1)
 
+new_line = "an elerium generator, an elerium-compatible microchip, a dilithium generator, a dilithium-compatible microchip, and a"
 raw_input = raw_input.replace(
     "and a",
-    "an elerium generator, an elerium-compatible microchip, a dilithium generator, a dilithium-compatible microchip, and a",
+    new_line,
     1,
 )
 start, elements = parse(raw_input)

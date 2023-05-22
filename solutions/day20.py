@@ -1,5 +1,4 @@
-with open("inputs/day20.txt") as f:
-    raw_input = f.read().splitlines()
+from operator import attrgetter
 
 
 class Interval:
@@ -14,12 +13,6 @@ class Interval:
         return self.upper - self.lower + 1
 
 
-intervals = sorted(
-    [Interval(*[int(x) for x in line.split("-")]) for line in raw_input],
-    key=lambda x: x.lower,
-)
-
-
 def find_lowest_allowed(intervals):
     candidate = 0
     found = []
@@ -32,9 +25,16 @@ def find_lowest_allowed(intervals):
     return found
 
 
+with open("inputs/day20.txt") as f:
+    raw_input = f.read().splitlines()
+
+intervals = sorted(
+    [Interval(*[int(x) for x in line.split("-")]) for line in raw_input],
+    key=attrgetter("lower"),
+)
 all_allowed = find_lowest_allowed(intervals)
 part1 = all_allowed[0].lower
 print(part1)
 
-part2 = sum((x.size() for x in all_allowed))
+part2 = sum(x.size() for x in all_allowed)
 print(part2)

@@ -1,11 +1,3 @@
-with open("inputs/day18.txt") as f:
-    raw_input = f.read().rstrip("\n")
-
-trap = "^"
-processed = [x == trap for x in list(raw_input)]
-# raw_input = [False, True, True, False, True, False, True, True, True, True]
-
-
 def expand(start, n):
     last = {(j): x for j, x in enumerate(start)}
     cols = len(start)
@@ -27,6 +19,11 @@ def expand(start, n):
     return total
 
 
+with open("inputs/day18.txt") as f:
+    raw_input = f.read().rstrip("\n")
+
+trap = "^"
+processed = [x == trap for x in list(raw_input)]
 part1 = expand(processed, 40)
 part2 = expand(processed, 400000)
 print(part1)

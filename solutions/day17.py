@@ -13,16 +13,15 @@ def l1_maker(target):
 def search(passcode, start, goal, distance, x_bounds, y_bounds, find_longest):
     # distance, coord, previous
     weight = -1 if find_longest else 1
+    directions = {"U": -1j, "D": 1j, "L": -1, "R": 1}
     Q = PriorityQueue()
     Q.put((weight * distance(start), passcode, start))
-    directions = {"U": -1j, "D": 1j, "L": -1, "R": 1}
     xmin, xmax = x_bounds
     ymin, ymax = y_bounds
     best = None
 
     while Q.qsize():
         _, chars, coord = Q.get()
-        # print(coord, chars)
         if coord == goal:
             if best is None:
                 best = chars
