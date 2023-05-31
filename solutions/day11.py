@@ -1,6 +1,5 @@
 import re
 from collections import defaultdict
-from collections import deque
 from functools import cache
 from math import inf
 from math import log2
@@ -27,7 +26,7 @@ def display(num, elements, player_bit):
 
 def parse(raw):
     values = {"generator": 0, "microchip": 1}
-    elements = sorted(re.findall(r"[a-z]+(?:ium|gen)", raw))
+    elements = sorted(re.findall(r"[a-z]+(?:ium|gen|alt)", raw))
     filtered = []
     for el in elements:
         if el not in filtered:
@@ -51,7 +50,6 @@ def parse(raw):
     return result, elements
 
 
-# @cache
 def h(state):
     # Reminder: A* is correct IFF h never overestimates
     s = running = 0
@@ -106,7 +104,6 @@ def A_star(start, n_elements, h):
 
     bottom = max(start.keys())
     top = min(start.keys())
-    # player_bit = 2**n_elements * 2
     goal = 2 ** (n_elements * 2 + 1) - 1
     goal_state = {k: 0 for k in start.keys()}
     goal_state[top] = goal
@@ -259,28 +256,14 @@ def A_star(start, n_elements, h):
     return g_score[goal_hash]
 
 
-def reconstruct_path(came_from, current):
-    S = deque([current])
-    while current in came_from.keys():
-        current = came_from[current]
-        S.appendleft(current)
-    return S
-
-
-path = f"../inputs/day11.txt"
 with open("inputs/day11.txt") as f:
     raw_input = f.read()
 
-# raw_input = """The first floor contains a hydrogen-compatible microchip and a lithium-compatible microchip.
-# The second floor contains a hydrogen generator.
-# The third floor contains a lithium generator.
-# The fourth floor contains nothing relevant."""
-#
 start, elements = parse(raw_input)
 player_bit = 2 ** (len(elements.keys()) * 2)
 
-# part1 = A_star(start, len(elements.keys()), h)
-part1 = h(start)
+part1 = A_star(start, len(elements.keys()), h)
+# part1 = h(start)
 print(part1)
 
 new_line = "an elerium generator, an elerium-compatible microchip, a dilithium generator, a dilithium-compatible microchip, and a"

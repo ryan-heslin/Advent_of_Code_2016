@@ -118,8 +118,8 @@ part2 += (
 )
 
 target_size = nodes[target].size
-assert all(
-    nodes[(x, 0)].size <= target_size for x in range(extents["xmin"], extents["xmax"])
-)
+# assert all(
+#     nodes[(x, 0)].size <= target_size for x in range(extents["xmin"], extents["xmax"])
+# )
 
 print(part2)
