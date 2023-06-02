@@ -1,279 +1,341 @@
-import re
 from collections import defaultdict
-from functools import cache
+from itertools import chain
+from itertools import combinations
 from math import inf
-from math import log2
 from queue import PriorityQueue
+from string import punctuation
+
+ELEMENTS = {
+    "hydrogen",
+    "helium",
+    "lithium",
+    "beryllium",
+    "boron",
+    "carbon",
+    "nitrogen",
+    "oxygen",
+    "fluorine",
+    "neon",
+    "sodium",
+    "magnesium",
+    "aluminium",
+    "silicon",
+    "phosphorus",
+    "sulfur",
+    "chlorine",
+    "argon",
+    "potassium",
+    "calcium",
+    "scandium",
+    "titanium",
+    "vanadium",
+    "chromium",
+    "manganese",
+    "iron",
+    "cobalt",
+    "nickel",
+    "copper",
+    "zinc",
+    "gallium",
+    "germanium",
+    "arsenic",
+    "selenium",
+    "bromine",
+    "krypton",
+    "rubidium",
+    "strontium",
+    "yttrium",
+    "zirconium",
+    "niobium",
+    "molybdenum",
+    "technetium",
+    "ruthenium",
+    "rhodium",
+    "palladium",
+    "silver",
+    "cadmium",
+    "indium",
+    "tin",
+    "antimony",
+    "tellurium",
+    "iodine",
+    "xenon",
+    "caesium",
+    "barium",
+    "lanthanum",
+    "cerium",
+    "praseodymium",
+    "neodymium",
+    "promethium",
+    "samarium",
+    "europium",
+    "gadolinium",
+    "terbium",
+    "dysprosium",
+    "holmium",
+    "erbium",
+    "thulium",
+    "ytterbium",
+    "lutetium",
+    "hafnium",
+    "tantalum",
+    "tungsten",
+    "rhenium",
+    "osmium",
+    "iridium",
+    "platinum",
+    "gold",
+    "mercury",
+    "thallium",
+    "lead",
+    "bismuth",
+    "polonium",
+    "astatine",
+    "radon",
+    "francium",
+    "radium",
+    "actinium",
+    "thorium",
+    "protactinium",
+    "uranium",
+    "neptunium",
+    "plutonium",
+    "americium",
+    "curium",
+    "berkelium",
+    "californium",
+    "einsteinium",
+    "fermium",
+    "mendelevium",
+    "nobelium",
+    "lawrencium",
+    "rutherfordium",
+    "dubnium",
+    "seaborgium",
+    "bohrium",
+    "hassium",
+    "meitnerium",
+    "darmstadtium",
+    "roentgenium",
+    "copernicium",
+    "nihonium",
+    "flerovium",
+    "moscovium",
+    "livermorium",
+    "tennessine",
+    "oganesson",
+}
 
 
-iter_floors = (4, 3, 2)
+def make_goal(start):
+    return (top, tuple((top, top) for _ in range(len(start[1]))))
 
 
-def display(num, elements, player_bit):
-    fill_digits = int(log2(player_bit))
-    if num.bit_length() >= fill_digits:
-        num ^= player_bit
-        has_player = True
-    else:
-        has_player = False
-    digits = (bin(num)[2:]).zfill(fill_digits)
-    if has_player:
-        print("Has player")
-    print("".join(elements))
-    print("MG" * ((fill_digits - 1) // 2))
-    print(digits)
+def clamp(low, high, x):
+    return max(min(x, high), low)
 
 
-def parse(raw):
-    values = {"generator": 0, "microchip": 1}
-    elements = sorted(re.findall(r"[a-z]+(?:ium|gen|alt)", raw))
-    filtered = []
-    for el in elements:
-        if el not in filtered:
-            filtered.append(el)
+# Chip cannot coexist with generator of different type unless paired with own generator
+# Must bring at least one item
 
-    raw = re.sub("-compatible", "", raw)
-    raw = raw.splitlines()
-    raw.reverse()
-    elements = dict(zip(filtered, range(len(elements))))
-    result = {k: 0 for k in range(len(raw))}
 
-    for floor, line in enumerate(raw):
-        if "ium" in line or "ogen" in line:
-            line = re.sub("(?=[a-z]) and ", ", ", line)
-            parts = line.rstrip(".").split(", ")
-            for part in parts:
-                element, component = part.split(" ")[-2:]
-                result[floor] |= 2 ** ((elements[element] * 2) + values[component])
-    # Leftmost bit representing player on floor
-    result[max(result.keys())] |= 2 ** (max(elements.values()) * 2 + 2)
-    return result, elements
+def floor_valid(microchips, generators):
+    return not (generators and microchips - generators)
+
+
+def validate(
+    player_microchips,
+    player_generators,
+    target_microchips,
+    target_generators,
+    taken_microchips,
+    taken_generators,
+):
+    new_player_microchips = player_microchips - taken_microchips
+    new_player_generators = player_generators - taken_generators
+    if not floor_valid(new_player_microchips, new_player_generators):
+        return False
+
+    new_target_microchips = target_microchips | taken_microchips
+    new_target_generators = target_generators | taken_generators
+    return floor_valid(new_target_microchips, new_target_generators)
+
+
+def find_valid_moves(state):
+    player_floor, floors = state
+    targets = TARGETS[player_floor]
+    result = set()
+
+    for target_floor in targets:
+        # Unpaired generator on floor above
+        player_generators = set()
+        player_microchips = set()
+        target_microchips = set()
+        target_generators = set()
+        movable = set()
+
+        for i, pair in enumerate(floors):
+            # microchips
+            if pair[0] == target_floor:
+                target_microchips.add(i)
+            elif pair[0] == player_floor:
+                movable.add((i, 0))
+                player_microchips.add(i)
+            # generators
+            if pair[1] == target_floor:
+                target_generators.add(i)
+            elif pair[1] == player_floor:
+                movable.add((i, 1))
+                player_generators.add(i)
+
+        choices = chain(movable, combinations(movable, r=2))
+        common_args = {
+            "player_microchips": player_microchips,
+            "player_generators": player_generators,
+            "target_microchips": target_microchips,
+            "target_generators": target_generators,
+        }
+        for choice in choices:
+            match choice:
+                # Single microchip
+                case (i, 0):
+                    var_args = {"taken_microchips": {i}, "taken_generators": set()}
+                    replacements = {i: (target_floor, floors[i][1])}
+                case (i, 1):
+                    var_args = {"taken_microchips": set(), "taken_generators": {i}}
+                    replacements = {i: (floors[i][0], target_floor)}
+
+                    # Two microchips
+                case ((i1, 0), (i2, 0)):
+                    var_args = {"taken_microchips": {i1, i2}, "taken_generators": set()}
+                    replacements = {
+                        i1: (target_floor, floors[i1][1]),
+                        i2: (target_floor, floors[i2][1]),
+                    }
+
+                # Two generators
+                case ((i1, 1), (i2, 1)):
+                    var_args = {"taken_microchips": set(), "taken_generators": {i1, i2}}
+                    replacements = {
+                        i1: (floors[i1][0], target_floor),
+                        i2: (floors[i2][0], target_floor),
+                    }
+                # microchip-generator
+                case ((i1, 0), (i2, 1)):
+                    var_args = {"taken_microchips": {i1}, "taken_generators": {i2}}
+                    if i1 == i2:
+                        replacements = {i1: (target_floor, target_floor)}
+                    else:
+                        replacements = {
+                            i1: (target_floor, floors[i1][1]),
+                            i2: (floors[i2][0], target_floor),
+                        }
+                # Generator-microchip
+                case ((i1, 1), (i2, 0)):
+                    var_args = {"taken_microchips": {i2}, "taken_generators": {i1}}
+                    if i1 == i2:
+                        replacements = {i1: (target_floor, target_floor)}
+                    else:
+                        replacements = {
+                            i1: (floors[i1][0], target_floor),
+                            i2: (
+                                target_floor,
+                                floors[i2][1],
+                            ),
+                        }
+                case _:
+                    raise ValueError
+
+            if validate(**common_args, **var_args):
+                copy = list(floors)
+                for position, replacement in replacements.items():
+                    copy[position] = replacement
+                result.add((target_floor, tuple(sorted(copy))))
+
+    return result
+
+
+def A_star(start, goal):
+    dist = defaultdict(lambda: inf)
+    dist[start] = 0
+    g_score = defaultdict(lambda: inf)
+    g_score[start] = 0
+    f_score = defaultdict(lambda: inf)
+    estimate = h(start)
+    f_score[start] = estimate
+    queue = PriorityQueue()
+    queue.put((estimate, start), block=False)
+
+    while queue.qsize():
+        estimate, current_state = queue.get()
+        this_g_score = g_score[current_state]
+        if this_g_score >= g_score[goal] or current_state == goal:
+            continue
+
+        neighbors = find_valid_moves(current_state)
+        new_g_score = this_g_score + 1
+        for neighbor in neighbors:
+            if new_g_score < g_score[neighbor]:
+                g_score[neighbor] = new_g_score
+                new_f_score = new_g_score + h(neighbor)
+                f_score[neighbor] = new_f_score
+                queue.put((new_f_score, neighbor))
+
+    return g_score[goal]
 
 
 def h(state):
-    # Reminder: A* is correct IFF h never overestimates
-    s = running = 0
-    for k in iter_floors:
-        this_floor = state[(k - 1)]
-        this_floor ^= player_bit * (this_floor >= player_bit)
-        this_floor = this_floor.bit_count()
-        running += this_floor
-        if running > 0:
-            s += 2 * max(running - 2, 0) + 1
-    return s
+    return sum(map(sum, state[1])) // 2
 
 
-def make_hash(state):
-    return hash(
-        "".join(
-            bin(v)[2:].zfill(11) + str(k)
-            for k, v in sorted(state.items(), key=lambda k: k[0])
-        )
-    )
+# (microchip, generator) pairs
+def parse(lines):
+    found = {}
+    result = []
+    remover = str.maketrans("", "", punctuation)
+    for floor, line in enumerate(lines):
+        words = line.split(" ")
+        while words:
+            current = words.pop(0).split("-")[0].replace(",", "")
+            if not current:
+                continue
+            if current in ELEMENTS:
+                component = words[0].translate(remover)
+                # Paired component found?
+                if current in found:
+                    position = found[current]
+                    chip, gen = result[position]
+                    result[position] = (chip, floor) if gen is None else (floor, gen)
+                else:
+                    found[current] = len(result)
+                    new = (floor, None) if component == "microchip" else (None, floor)
+                    result.append(new)
 
-
-@cache
-def validate(num):
-    # Chip lacking own RTG while other RTG present, even if that RTG connected.
-    lone_generators = set()
-    lone_microchips = set()
-    element = 0
-    num ^= (num >= player_bit) * player_bit
-
-    while num:
-        remainder = num % 4
-        # OK if generator and microchip both present
-        if remainder == 1:
-            lone_generators.add(element)
-        elif remainder == 2:
-            lone_microchips.add(element)
-        if lone_generators and lone_microchips:
-            return False
-        num >>= 2
-    return True
-
-
-def A_star(start, n_elements, h):
-    # bottom floor has max value
-    visited = set()
-    start_hash = make_hash(start)
-    f_score = defaultdict(lambda: inf)
-    f_score[start_hash] = h(start)
-    g_score = defaultdict(lambda: inf)
-    g_score[start_hash] = 0
-
-    bottom = max(start.keys())
-    top = min(start.keys())
-    goal = 2 ** (n_elements * 2 + 1) - 1
-    goal_state = {k: 0 for k in start.keys()}
-    goal_state[top] = goal
-    goal_hash = make_hash(goal_state)
-    # Floor above/below each
-    possibilities = {
-        floor: (floor - 1,)
-        if floor == bottom
-        else (floor + 1,)
-        if floor == top
-        else (floor - 1, floor + 1)
-        for floor in start.keys()
-    }
-
-    Q = PriorityQueue()
-    visited.add(start_hash)
-    Q.put((f_score[start_hash], start_hash, start), block=False)
-
-    while Q.qsize():
-        h_score, current_hash, current_state = Q.get(block=False)
-        if (
-            h_score + g_score[current_hash] >= g_score[goal_hash]
-            or current_state[top] == goal
-        ):
-            # breakpoint()
-            continue
-        # current_hash = make_hash(current_state)
-        # Since it has leading bit
-        current_floor, current_floor_num = max(
-            current_state.items(), key=lambda x: x[1]
-        )
-
-        # Strip player bit, since we're moving
-        # assert current_floor_num > player_bit
-        current_floor_num ^= player_bit
-        element = 0
-        targets = possibilities[current_floor]
-        # unchanged = {k: v for k, v in current_state.items() if k not in targets}
-
-        generators = set()
-        microchips = set()
-        element = 0
-
-        # Illegal if chip on same floor as other element's RTG, but chip lacks own RTG
-        copy = current_floor_num
-        while copy:
-            if copy % 2 == 1:
-                generators.add(element)
-            copy >>= 1
-            if copy % 2 == 1:
-                microchips.add(element)
-            copy >>= 1
-            element += 1
-
-        neighbors = []
-        # If multiple chip-RTG pairs can be moved, pick 1
-        # If several chips need moving each have RTGs on target floor, pick 1
-        # Better h function
-        # Remove player bit
-        for gen in generators:
-            generator_num = 2 ** (gen * 2)
-            new_current_floor_num = current_floor_num ^ generator_num
-            if validate(new_current_floor_num):
-                # new_current_floor = {current_floor: new_current_floor_num_num}
-                for target_floor in targets:
-                    unchanged = {
-                        floor: num
-                        for floor, num in current_state.items()
-                        if floor != current_floor and floor != target_floor
-                    }
-                    new_target_floor_num = player_bit | (
-                        current_state[target_floor] | generator_num
-                    )
-                    # Add state if both new current floor and target floor state after move are legal
-                    if validate(new_target_floor_num):
-                        neighbors.append(
-                            {
-                                **unchanged,
-                                current_floor: new_current_floor_num,
-                                target_floor: new_target_floor_num,
-                            }
-                        )
-
-        for chip in microchips:
-            microchip_num = 2 ** (chip * 2 + 1)
-            new_current_floor_num = current_floor_num ^ microchip_num
-            if validate(new_current_floor_num):
-                # new_current_floor = {current_floor: new_current_floor_num_num}
-                for target_floor in targets:
-                    unchanged = {
-                        floor: num
-                        for floor, num in current_state.items()
-                        if floor != current_floor and floor != target_floor
-                    }
-                    new_target_floor_num = player_bit | (
-                        current_state[target_floor] | microchip_num
-                    )
-                    # Add state if both new current floor and target floor state after move are legal
-                    if validate(new_target_floor_num):
-                        neighbors.append(
-                            {
-                                **unchanged,
-                                current_floor: new_current_floor_num,
-                                target_floor: new_target_floor_num,
-                            }
-                        )
-        # Combinations
-        if generators and microchips:
-            moved_pair = False
-            for generator in generators:
-                for chip in microchips:
-                    if generator == chip:
-                        if moved_pair:
-                            continue
-                        moved_pair = True
-                    combined_num = 2 ** (generator * 2) + 2 ** (chip * 2 + 1)
-                    new_current_floor_num = current_floor_num ^ combined_num
-                    if validate(new_current_floor_num):
-                        for target_floor in targets:
-                            unchanged = {
-                                floor: num
-                                for floor, num in current_state.items()
-                                if floor != current_floor and floor != target_floor
-                            }
-                            new_target_floor_num = player_bit | (
-                                current_state[target_floor] | combined_num
-                            )
-                            # Add state if both new current floor and target floor state after move are legal
-                            if validate(new_target_floor_num):
-                                neighbors.append(
-                                    {
-                                        **unchanged,
-                                        current_floor: new_current_floor_num,
-                                        target_floor: new_target_floor_num,
-                                    }
-                                )
-        # assert len(neighbors) == len(set(make_hash(x) for x in neighbors))
-        # breakpoint()
-        for neighbor in neighbors:
-            neighbor_hash = make_hash(neighbor)
-            candidate_g_score = g_score[current_hash] + 1
-            if candidate_g_score < g_score[neighbor_hash]:
-                estimate = h(neighbor)
-                # Abandon if impossible to beat best known path
-                if candidate_g_score + (estimate // 2) >= g_score[goal_hash]:
-                    continue
-                g_score[neighbor_hash] = candidate_g_score
-                f_score[neighbor_hash] = candidate_g_score + estimate
-                Q.put((estimate, neighbor_hash, neighbor), block=False)
-    return g_score[goal_hash]
+    return tuple(sorted(result))
 
 
 with open("inputs/day11.txt") as f:
-    raw_input = f.read()
+    raw_input = f.read().splitlines()
 
-start, elements = parse(raw_input)
-player_bit = 2 ** (len(elements.keys()) * 2)
-
-part1 = A_star(start, len(elements.keys()), h)
-# part1 = h(start)
+bottom = 0
+top = len(raw_input) - 1
+TARGETS = {0: (1,), 1: (0, 2), 2: (1, 3), 3: (2,)}
+parsed = parse(raw_input)
+start = (bottom, parsed)
+goal = make_goal(start)
+part1 = A_star(start, goal)
 print(part1)
 
-new_line = "an elerium generator, an elerium-compatible microchip, a dilithium generator, a dilithium-compatible microchip, and a"
-raw_input = raw_input.replace(
-    "and a",
-    new_line,
-    1,
-)
-start, elements = parse(raw_input)
-player_bit = 2 ** (len(elements.keys()) * 2)
-# part2 = A_star(start, len(elements.keys()), h)
-part2 = h(start)
+new_elements = """
+    An elerium generator.
+    An elerium-compatible microchip.
+    A dilithium generator.
+    A dilithium-compatible microchip.
+"""
+raw_input[0] += " ".join(new_elements.splitlines())
+ELEMENTS.update(("elerium", "dilithium"))
+parsed = parse(raw_input)
+start = (bottom, parsed)
+goal = make_goal(start)
+part2 = A_star(start, goal)
 print(part2)
