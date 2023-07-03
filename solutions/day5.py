@@ -3,7 +3,7 @@ from hashlib import md5
 
 def find_password(stem, part1, length=8):
     index = found = 0
-    password = [None] * length
+    password: list[None | str] = [None] * length
 
     while found < length:
         this = str(md5(f"{stem}{index}".encode("utf-8")).hexdigest())

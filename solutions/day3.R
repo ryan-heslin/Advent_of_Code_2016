@@ -3,9 +3,7 @@ validate_triangle <- function(x) {
 }
 
 raw_input <- read.table("inputs/day3.txt")
-
 by_row <- asplit(raw_input, MARGIN = 1)
-
 
 part1 <- vapply(by_row, validate_triangle, FUN.VALUE = logical(1)) |>
     sum()

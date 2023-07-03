@@ -34,7 +34,6 @@ def verify_room(code):
     counts = tabulate_letters((code["name"][0].replace("-", "")))
     five_most = "".join(top_five(counts))
     return int(code["id"][0]) if code["checksum"][0] == five_most else 0
-    # Break any ties alphabetically
 
 
 def decrypt(code, id):

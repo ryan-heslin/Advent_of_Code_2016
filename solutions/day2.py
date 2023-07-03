@@ -18,11 +18,9 @@ def clamp_complex(x):
 
 def execute_line(line, start):
     position = start
-    # print("\n")
     for char in line:
         position += directions[char]
         position = clamp_complex(position)
-        # print(position)
     return position
 
 

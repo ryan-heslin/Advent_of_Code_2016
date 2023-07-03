@@ -27,8 +27,9 @@ def generate_keys(salt, n=64, times=1):
     hashes = {}
     keys = ("hash", "quintuplets")
 
-    for i in range(1000):
-        hashes[i] = dict(zip(keys, process_hash(f"{salt}{i}", times)))
+    hashes = {
+        i: dict(zip(keys, process_hash(f"{salt}{i}", times))) for i in range(1000)
+    }
 
     i = 0
     while found < n:
@@ -50,6 +51,7 @@ def generate_keys(salt, n=64, times=1):
 
 
 salt = "zpqevtbw"
+salt = "ahsbgdzn"
 part1 = generate_keys(salt, 64)
 print(part1)
 
