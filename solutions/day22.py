@@ -79,19 +79,21 @@ print(part1)
 
 free = next(filter(lambda x: x.empty, nodes.values())).coords
 
-can_move = {
-    key: {coord: node.can_move(nodes[coord])}
-    for key, node in nodes.items()
-    for coord in node.neighbors
-}
+# can_move = {
+#     key: {coord: node.can_move(nodes[coord])}
+#     for key, node in nodes.items()
+#     for coord in node.neighbors
+# }
 
 goal = (extents["xmin"], extents["ymin"])
 target = (extents["xmax"], extents["ymin"])
 
-full = list(filter(lambda k: nodes[k].used > 100, nodes.keys()))
+full =  [k  for k in nodes.keys() if nodes[k].used > 100]
+assert len(set(coord[1] for coord in full)) == 1
 
 part2 = 0
-xes = [coord[0] for coord in filter(lambda coord: coord[1] < free[1], full)]
+xes = [coord[0] for coord in  full if coord[1] < free[1]]
+# Choose shortest direction of movement
 if free[0] in xes:
     left_deviation = right_deviation = 2
     for i in range(free[0] - 1, min(xes) - 1, -1):
@@ -104,11 +106,7 @@ if free[0] in xes:
         right_deviation += 2
     part2 += min((left_deviation, right_deviation))
 
-too_small_top = list(
-    filter(
-        lambda k: k[1] == 0 and nodes[k].size < nodes[(k[0], 1)].used < 10, nodes.keys()
-    )
-)
+
 part2 += (
     abs(free[0] - target[0])
     # Initial shift down and left to clear node left of target, plus initial movement left of target
@@ -119,7 +117,7 @@ part2 += (
 
 target_size = nodes[target].size
 # assert all(
-#     nodes[(x, 0)].size <= target_size for x in range(extents["xmin"], extents["xmax"])
+#     nodes[(x, 0)].size <= target_size for x in range(int(extents["xmin"]), int(extents["xmax"] + 1))
 # )
 
 print(part2)

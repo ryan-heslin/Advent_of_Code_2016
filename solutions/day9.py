@@ -38,11 +38,7 @@ def parse(string, recurse=False):
             break
         new_text = next(gen)
 
-        if recurse:
-            new_length = parse(new_text, recurse)
-        else:
-            new_length = len(new_text)
-        result += new_length
+        result += parse(new_text, recurse) if recurse else len(new_text)
     return result
 
 
@@ -54,7 +50,7 @@ def parse_compression(instructions):
 
 
 with open("inputs/day9.txt") as f:
-    raw_input = f.read().rstrip("\n")
+    raw_input = f.read().rstrip("\n").strip(" ")
 
 part1 = parse(raw_input)
 print(part1)

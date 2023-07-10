@@ -18,7 +18,6 @@ execute <- function(grid, instructions) {
         }
     }
 
-
     rotate_vector <- function(x, n) {
         len <- length(x)
         cutpoint <- len - n + 1

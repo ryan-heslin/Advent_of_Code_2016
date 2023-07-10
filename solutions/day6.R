@@ -9,9 +9,11 @@ processed <- strsplit(raw_input[[1]], split = "") |>
     do.call(what = rbind)
 
 
-part1 <- apply(processed, MARGIN = 2, FUN = select_level, fun = max) |> paste(collapse = "")
+part1 <- apply(processed, MARGIN = 2, FUN = select_level, fun = max) |>
+    paste(collapse = "")
 
 print(part1)
 
-part2 <- apply(processed, MARGIN = 2, FUN = select_level, fun = min) |> paste(collapse = "")
+part2 <- apply(processed, MARGIN = 2, FUN = select_level, fun = min) |>
+    paste(collapse = "")
 print(part2)
