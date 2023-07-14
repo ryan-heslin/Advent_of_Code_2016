@@ -28,14 +28,15 @@ class Bot:
 
     def give(self, low, high, low_mapping, high_mapping):
         # Only give if both chips available
+        cls = type(self)
         if self.low is None or self.high is None:
             return
 
-        if isinstance(low_mapping[low], self.__class__):
+        if isinstance(low_mapping[low], cls):
             low_mapping[low].receive(self.low)
         else:
             low_mapping[low] = self.low
-        if isinstance(high_mapping[high], self.__class__):
+        if isinstance(high_mapping[high], cls):
             high_mapping[high].receive(self.high)
         else:
             high_mapping[high] = self.high
@@ -46,8 +47,10 @@ class Bot:
 
 
 class Part1Bot(Bot):
+    comparisons = (17, 61)
     def give(self, low, high, low_mapping, high_mapping):
-        if self.low == 17 and self.high == 61:
+        cls = type(self)
+        if (self.low, self.high) == cls.comparisons:
             answers[0] = self.number
         super().give(low, high, low_mapping, high_mapping)
 
@@ -80,12 +83,12 @@ bot_numbers = set()
 bots = {}
 
 for line in raw_input:
-    bot_numbers.update((int(x) for x in re.findall(r"bot (\d+)", line)))
-bots = dict(zip(bot_numbers, (Part1Bot(num) for num in bot_numbers)))
+    bot_numbers.update(map(int,  re.findall(r"bot (\d+)", line)))
+bots = dict(zip(bot_numbers, map(Part1Bot, bot_numbers)))
 
 output_numbers = set()
 for line in raw_input:
-    output_numbers.update((int(x) for x in re.findall(r"output (\d+)", line)))
+    output_numbers.update(map(int, re.findall(r"output (\d+)", line)))
 outputs = dict(zip(output_numbers, (None,) * len(output_numbers)))
 
 parsed = list(map(parse, raw_input))

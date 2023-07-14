@@ -126,18 +126,15 @@ ELEMENTS = {
     "oganesson",
 }
 
+def empty_map():
+    return defaultdict(lambda: inf)
 
-def make_goal(start):
+def make_goal(start, top):
     return (top, tuple((top, top) for _ in range(len(start[1]))))
 
 
 def clamp(low, high, x):
     return max(min(x, high), low)
-
-
-# Chip cannot coexist with generator of different type unless paired with own generator
-# Must bring at least one item
-
 
 def floor_valid(microchips, generators):
     return not (generators and microchips - generators)
@@ -175,7 +172,6 @@ def find_valid_moves(state):
         movable = set()
 
         for i, pair in enumerate(floors):
-            # microchips
             if pair[0] == target_floor:
                 target_microchips.add(i)
             elif pair[0] == player_floor:
@@ -256,11 +252,10 @@ def find_valid_moves(state):
 
 
 def A_star(start, goal):
-    dist = defaultdict(lambda: inf)
-    dist[start] = 0
-    g_score = defaultdict(lambda: inf)
-    g_score[start] = 0
-    f_score = defaultdict(lambda: inf)
+    dist = empty_map()
+    g_score = empty_map()
+    f_score = empty_map()
+    dist[start] = g_score[start] = 0
     estimate = h(start)
     f_score[start] = estimate
     queue = PriorityQueue()
@@ -322,7 +317,7 @@ top = len(raw_input) - 1
 TARGETS = {0: (1,), 1: (0, 2), 2: (1, 3), 3: (2,)}
 parsed = parse(raw_input)
 start = (bottom, parsed)
-goal = make_goal(start)
+goal = make_goal(start, top)
 part1 = A_star(start, goal)
 print(part1)
 
@@ -334,8 +329,9 @@ new_elements = """
 """
 raw_input[0] += " ".join(new_elements.splitlines())
 ELEMENTS.update(("elerium", "dilithium"))
+
 parsed = parse(raw_input)
 start = (bottom, parsed)
-goal = make_goal(start)
+goal = make_goal(start, top)
 part2 = A_star(start, goal)
 print(part2)
