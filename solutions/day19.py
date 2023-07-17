@@ -5,7 +5,7 @@ def josephus(n):
     return ~highest_one & ((n << 1) | 1)
 
 
-n = 3004953
+n = 3001330
 
 part1 = josephus(n)
 print(part1)
@@ -16,7 +16,6 @@ stolen = [False] * n
 i = 0
 n_elves = n
 while n_elves > 1:
-
     target = (i + n_elves // 2) % n_elves
     elves.pop(target)
     n_elves -= 1

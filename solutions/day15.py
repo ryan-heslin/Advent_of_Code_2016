@@ -6,7 +6,7 @@ def parse(line):
 def simulate(disks, start_time=0):
     pos = 0
     n_disks = len(disks)
-    # breakpoint()
+
     while True:
         # First instant
         for disk in disks:

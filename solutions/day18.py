@@ -1,5 +1,5 @@
 def expand(start, n):
-    last = {(j): x for j, x in enumerate(start)}
+    last = {j: x for j, x in enumerate(start)}
     cols = len(start)
     total = sum(not x for x in last.values())
     for _ in range(n - 1):

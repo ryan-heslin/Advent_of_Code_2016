@@ -51,7 +51,6 @@ def generate_keys(salt, n=64, times=1):
 
 
 salt = "zpqevtbw"
-salt = "ahsbgdzn"
 part1 = generate_keys(salt, 64)
 print(part1)
 

@@ -122,6 +122,8 @@ print(part1)
 part2 = None
 target = "fbgdceah"
 for perm in permutations(seed):
+    if part2: 
+        break
     password = deque(perm)
     for line in instructions:
         line()

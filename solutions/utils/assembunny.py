@@ -1,6 +1,3 @@
-from math import inf
-
-
 def parse_line(line):
     parts = line.split(" ")
     parts[1:] = [f"'{x}'" if x.isalpha() and not "-" in x else x for x in parts[1:]]

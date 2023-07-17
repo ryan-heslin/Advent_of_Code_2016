@@ -10,11 +10,6 @@ def binary_digits(n):
     log = log2(max(abs(n), 1))
     return floor(log + 1)
 
-
-def even_binary_length(n):
-    return (binary_digits(n) % 2) == 0
-
-
 # Remove dummy leading bit
 def to_string(n):
     return bin(n)[3:]
@@ -70,32 +65,25 @@ def fill_disk(n, disk_size):
 def checksum_stage(n):
     # Assume n has dummy leading 1 bit to retain leading zeroes
     n_digits = binary_digits(n)
-    # cur_digit = n_digits // 2
     result = 1
     while n_digits > 1:
         # Filling result from right
         result <<= 1
         # Two leftmost, stripping dummy bit
         pair = (n >> (n_digits - 3)) - 4
-        # print(bin(pair))
-        # left = pair >>2
         next_digit = int(pair == 0 or pair == 3)
-        result += next_digit  # * (2 ** cur_digit - 1)
+        result += next_digit 
         # Remove leading digits plus dummy bit, then restore dummy bit,
         # effectively padding with zeroes
         n = strip_leading_digits(n, 3)
         n_digits -= 2
         n = add_dummy_bit(n, target_length=n_digits - 1)
-        # print(bin(n))
-    # print(bin(result))
     return result  # , n_digits
 
 
 def make_checksum(n, offset):
     n >>= offset
     n = add_dummy_bit(n)
-    # print(bin(n))
-    # print(binary_digits(n))
     while (binary_digits(n) - 1) % 2 == 0:
         n = checksum_stage(n)
     return n
@@ -128,15 +116,15 @@ def generate_checksum(bytes):
         bytes = new
     return bytes
 
-
-num = binary("11101000110010100")
+raw = "11101000110010100"
+num = binary(raw)
 expanded, offset = fill_disk(num, 272)
 part1 = make_checksum(expanded, offset)
 print(to_string(part1))
 
-bytes = tuple(ord(x) for x in "11101000110010100")
+bytes = tuple(map(ord, raw))
 disk_size = 35651584
 
 expanded = fill_disk_bytes(bytes, disk_size)
 part2 = generate_checksum(expanded)
-print("".join(str(x) for x in part2))
+print("".join(map(str, part2)))
