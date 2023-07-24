@@ -5,7 +5,7 @@ def josephus(n):
     return ~highest_one & ((n << 1) | 1)
 
 
-n = 3001330
+n = 3004953
 
 part1 = josephus(n)
 print(part1)
