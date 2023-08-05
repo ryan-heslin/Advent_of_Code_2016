@@ -74,16 +74,17 @@ nodes, extents = parse(raw_input)
 add_neighbors = neighbor_finder(**extents)
 nodes = {node.coords: node.add_neighbors(add_neighbors) for node in nodes}
 
+xmax = -inf
+xmin = inf
+for k in nodes.keys():
+    xmax = max(xmax, k[0])
+    xmin = min(xmin, k[0])
+
 part1 = find_pairs(nodes)
 print(part1)
 
 free = next(filter(lambda x: x.empty, nodes.values())).coords
 
-# can_move = {
-#     key: {coord: node.can_move(nodes[coord])}
-#     for key, node in nodes.items()
-#     for coord in node.neighbors
-# }
 
 goal = (extents["xmin"], extents["ymin"])
 target = (extents["xmax"], extents["ymin"])
@@ -92,21 +93,28 @@ full =  [k  for k in nodes.keys() if nodes[k].used > 100]
 assert len(set(coord[1] for coord in full)) == 1
 
 part2 = 0
-xes = [coord[0] for coord in  full if coord[1] < free[1]]
+xes : list[int] = [coord[0] for coord in  full if coord[1] < free[1]]
 # Choose shortest direction of movement
-if free[0] in xes:
-    left_deviation = right_deviation = 2
-    for i in range(free[0] - 1, min(xes) - 1, -1):
-        if not i in xes:
-            break
-        left_deviation += 2
-    for i in range(free[0] + 1, max(xes) + 1):
-        if not i in xes:
-            break
-        right_deviation += 2
+if xes and free[0] in xes:
+    if min(xes) > xmin:
+        left_deviation = 2
+        for i in range(free[0] - 1, min(xes) - 1, -1):
+            if not i in xes:
+                break
+            left_deviation += 2
+    else:
+        left_deviation = inf
+    if max(xes) < xmax:
+        right_deviation = 2
+        for i in range(free[0] + 1, max(xes) + 1):
+            if not i in xes:
+                break
+            right_deviation += 2
+    else:
+        right_deviation = inf
     part2 += min((left_deviation, right_deviation))
-
-
+else:
+    part2 = 2
 part2 += (
     abs(free[0] - target[0])
     # Initial shift down and left to clear node left of target, plus initial movement left of target
@@ -116,8 +124,5 @@ part2 += (
 )
 
 target_size = nodes[target].size
-# assert all(
-#     nodes[(x, 0)].size <= target_size for x in range(int(extents["xmin"]), int(extents["xmax"] + 1))
-# )
 
 print(part2)
